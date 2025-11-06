@@ -7,8 +7,8 @@ to serve the frontend for the order service with [sws](https://github.com/static
 and add [traefik](https://doc.traefik.io/traefik/) as application proxy / load balancer.
 
 ## Todo 
-- [ ] Add [sws](https://github.com/static-web-server/static-web-server) to docker compose and serve the `./frontend` folder
-- [ ] Add [traefik](https://doc.traefik.io/traefik/) reverse proxy
+- [x] Add [sws](https://github.com/static-web-server/static-web-server) to docker compose and serve the `./frontend` folder
+- [x] Add [traefik](https://doc.traefik.io/traefik/) reverse proxy
   - sws should be reachable at http://localhost
   - The orderservice should be reachable at http://orders.localhost
 

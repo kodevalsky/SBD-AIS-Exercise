@@ -1,0 +1,26 @@
+# traefik_config.yml
+http:
+  routers:
+    sws:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - "web"
+      service: "sws-service"
+      priority: 1
+
+    orderservice:
+      rule: "Host(`orders.localhost`)"
+      entryPoints:
+        - "web"
+      service: "orderservice-service"
+
+  services:
+    sws-service:
+      loadBalancer:
+        servers:
+          - url: "http://sws:80"
+
+    orderservice-service:
+      loadBalancer:
+        servers:
+          - url: "http://orderservice:3000"
