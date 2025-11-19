@@ -18,16 +18,16 @@ Thanks for drinking with us!
 ```
 
 ## Todo
-- [ ] Add a Minio instance to the existing `docker-compose.yml`
+- [x] Add a Minio instance to the existing `docker-compose.yml`
   - Expose port 8500
   - Persist storage using a volume
   - Set the correct environment variables
-- [ ] Create a markdown compatible receipt string in `model/order.go` 
+- [x] Create a markdown compatible receipt string in `model/order.go` 
   - Make use of [fmt.Sprintf](https://gobyexample.com/string-formatting) to fill the string with data
-- [ ] Add Put and Get receipts functionality to the `rest/api.go` file
+- [x] Add Put and Get receipts functionality to the `rest/api.go` file
   - Add `PutObject` to `PostOrder` route
   - Add `GetObject` to `GetReceiptFile` route and serve the requested receipt markdown file
-- [ ] Verify that files are stored properly using an S3 compatible viewer
+- [x] Verify that files are stored properly using an S3 compatible viewer
 
 ## Tipps and Tricks
 Use the `debug.env` for development, **NOT** in your `docker-compose.yml`.

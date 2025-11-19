@@ -167,7 +167,7 @@ func PostOrder(db *repository.DatabaseHandler, s3 *minio.Client) http.HandlerFun
 			render.JSON(w, r, "Unable to read body")
 			return
 		}
-		err = json.Unmarshal(payload, order)
+		err = json.Unmarshal(payload, &order)
 		if err != nil {
 			slog.Error("Unable to decode body", slog.String("error", err.Error()))
 			render.Status(r, http.StatusBadRequest)
