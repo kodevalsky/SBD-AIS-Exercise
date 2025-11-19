@@ -5,11 +5,13 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"context"
 	"net/http"
 	"ordersystem/httptools"
 	"ordersystem/model"
 	"ordersystem/repository"
-
+	"ordersystem/storage"
+	"strings"
 	"github.com/go-chi/render"
 	"github.com/minio/minio-go/v7"
 	"gorm.io/gorm"
@@ -115,11 +117,32 @@ func GetReceiptFile(db *repository.DatabaseHandler, s3 *minio.Client) http.Handl
 		// dbOrder.Filename() can be used to get the filename.
 		// handle any error!
 
+		bucket_obj, err := s3.GetObject(context.Background(), storage.OrdersBucket, order.GetFilename(), minio.GetObjectOptions{})
+
+		if err != nil {
+			slog.Error("Unable to read receipt from s3", slog.String("error", err.Error()))
+			render.Status(r, http.StatusInternalServerError)
+			render.JSON(w, r, "Unable to read receipt from s3")
+			return
+		}
+		
 		// serve file
 		// todo
 		// set the correct header on w http.ResponseWriter ("Content-Type" and "Content-Disposition")
 		// Use the correct filename for "Content-Disposition" (https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Disposition)
 		// io.Copy can be used to write the result of s3.GetObject() to w http.ResponseWriter
+
+		w.Header().Set("Content-Type", "text/markdown")
+		w.Header().Set("Content-Disposition", "attachment; filename=\"" + order.GetFilename() + "\"")
+
+		_, err = io.Copy(w, bucket_obj)
+
+		if err != nil {
+			slog.Error("Unable to serve receipt", slog.String("error", err.Error()))
+			render.Status(r, http.StatusInternalServerError)
+			render.JSON(w, r, "Unable to serve recepit")
+			return
+		}
 	}
 }
 
@@ -144,7 +167,7 @@ func PostOrder(db *repository.DatabaseHandler, s3 *minio.Client) http.HandlerFun
 			render.JSON(w, r, "Unable to read body")
 			return
 		}
-		err = json.Unmarshal(payload, &order)
+		err = json.Unmarshal(payload, order)
 		if err != nil {
 			slog.Error("Unable to decode body", slog.String("error", err.Error()))
 			render.Status(r, http.StatusBadRequest)
@@ -167,6 +190,19 @@ func PostOrder(db *repository.DatabaseHandler, s3 *minio.Client) http.HandlerFun
 		// Size of the file is determined by the string.
 		// Use the following PutObjectOptions: minio.PutObjectOptions{ContentType: "text/markdown"}
 		// Handle errors!
+
+		reader := strings.NewReader(dbOrder.ToMarkdown())
+		
+		var filename string = dbOrder.GetFilename()
+
+		_, err = s3.PutObject(context.Background(), storage.OrdersBucket, filename, reader, int64(len(dbOrder.ToMarkdown())), minio.PutObjectOptions{ContentType: "text/markdown"})
+		if err != nil {
+			slog.Error("Unable to upload receipt to s3", slog.String("error", err.Error()))
+			render.Status(r, http.StatusInternalServerError)
+			render.JSON(w, r, "Unable to upload receipt to s3")
+			return
+		}
+
 		render.Status(r, http.StatusOK)
 		render.JSON(w, r, "ok")
 	}

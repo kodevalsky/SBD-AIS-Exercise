@@ -1,0 +1,22 @@
+http:
+  routers:
+    orders:
+      rule: "Host(`orders.localhost`)"
+      entryPoints:
+        - "web"
+      service: orderservice
+    sws:
+      rule: "Host(`localhost`)"
+      entryPoints:
+        - "web"
+      service: sws
+
+  services:
+    orderservice:
+      loadBalancer:
+        servers:
+          - url: "http://orderservice:3000"
+    sws:
+      loadBalancer:
+        servers:
+          - url: "http://sws:80"

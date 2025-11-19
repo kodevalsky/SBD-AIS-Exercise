@@ -6,6 +6,7 @@ networks:
 
 volumes:
   order_pg_vol:
+  minio_data:
   # todo
 
 services:
@@ -14,16 +15,16 @@ services:
     security_opt:
       - no-new-privileges:true
     command:
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=web"
+      - "--providers.file.filename=/etc/traefik/traefik-dynamic.yml"
+      - "--providers.file.watch=true"
       - "--entryPoints.web.address=:80"
+      - "--api.insecure=true"
     ports:
       - "80:80"
       - "8080:8080"
     volumes:
-      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      # Mount the dynamic configuration file
+      - "./traefik-dynamic.yml:/etc/traefik/traefik-dynamic.yml:ro"
     networks:
       - web
 
@@ -31,11 +32,6 @@ services:
     build: .
     restart: unless-stopped
     command: [ "/app/ordersystem" ]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.orders.rule=Host(`orders.localhost`)"
-      - "traefik.http.routers.orders.entrypoints=web"
-      - "traefik.http.services.orders.loadbalancer.server.port=3000"
     environment:
       - POSTGRES_DB=order
       - POSTGRES_USER=docker
@@ -56,10 +52,6 @@ services:
       - SERVER_ROOT=/public
     volumes:
       - ./frontend:/public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sws.rule=Host(`localhost`)"
-      - "traefik.http.routers.sws.entrypoints=web"
     networks:
       - intercom
       - web
@@ -80,6 +72,19 @@ services:
       - PGPORT=5555
 
   order-minio:
+    image: minio/minio:latest
+    restart: always
+    ports:
+      - "8500:8500"
+    networks:
+      - intercom
+    command: ["server", "--address", ":8500", "/data"]
+    volumes:
+      - minio_data:/data
+    environment:
+      - MINIO_ROOT_USER=root
+      - MINIO_ROOT_PASSWORD=verysecret
+
     # todo use minio/minio:latest as image
     # expose 8500
     # add to network intercom
