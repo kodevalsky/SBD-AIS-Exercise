@@ -9,17 +9,34 @@ package models;
 
 // Messages
 
-// todo implement messages
-//
-// message MyMessage {
-//  ....
-// }
+message Drink {
+  int32 id = 1;
+  string name = 2;
+  float price = 3;
+  string description = 4;
+}
 
+message GetDrinksResponse {
+  repeated Drink drinks = 1;
+}
 
-// Generate go files with:
-// Execute `generate_pb.sh`
+message OrderRequest {
+  int32 drink_id = 1;
+  int32 count = 2;
+}
+
+message OrderItem {
+  Drink drink = 1;
+  int32 amount = 2;
+}
+
+message GetOrdersResponse {
+  repeated OrderItem orders = 1;
+}
 
 // Define the service
 service OrderService {
-  // todo define rpc functions
+  rpc GetDrinks(google.protobuf.Empty) returns (GetDrinksResponse);
+  rpc OrderDrink(OrderRequest) returns (google.protobuf.Empty);
+  rpc GetOrders(google.protobuf.Empty) returns (GetOrdersResponse);
 }

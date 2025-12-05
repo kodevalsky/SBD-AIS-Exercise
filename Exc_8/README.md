@@ -13,17 +13,17 @@ The gRPC server should be able to serve the following routes:
 - `GetDrinks`
 - `GetOrders`
 
-- [ ] Create a protobuf definition
-- [ ] Generate a Go client and server
-- [ ] Implement the `OrderServiceServer` interface with all it's functions (`OrderDrink`, `GetDrinks`, `GetOrders`)
+- [x] Create a protobuf definition
+- [x] Generate a Go client and server
+- [x] Implement the `OrderServiceServer` interface with all it's functions (`OrderDrink`, `GetDrinks`, `GetOrders`)
   - Make sure to embed `pb.UnimplementedOrderServiceServer` in your server struct for forward compatibility
   - Prepopulate drinks and store orders in-memory
-- [ ] Create a client that does the following tasks sequentially
+- [x] Create a client that does the following tasks sequentially
   - List drinks
   - Order a few drinks
   - Order more drinks
   - Get order total
-- [ ] Start the server in a go routine and then run the client
+- [x] Start the server in a go routine and then run the client
 
 The final output of your program should look something like this:
 ```
